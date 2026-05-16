@@ -9,29 +9,39 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('settings', function (Blueprint $table) {
-            $table->string('subscription_base_url')->nullable()->after('xui_base_url');
-        });
+        if (! Schema::hasColumn('settings', 'subscription_base_url')) {
+            Schema::table('settings', function (Blueprint $table) {
+                $table->string('subscription_base_url')->nullable()->after('xui_base_url');
+            });
+        }
 
-        DB::table('settings')
-            ->whereNull('subscription_base_url')
-            ->update(['subscription_base_url' => 'https://sub.cheeta.site:2096/sub']);
+        if (Schema::hasColumn('settings', 'subscription_base_url')) {
+            DB::table('settings')
+                ->whereNull('subscription_base_url')
+                ->update(['subscription_base_url' => 'https://sub.cheeta.site:2096/sub']);
+        }
 
-        Schema::table('clients', function (Blueprint $table) {
-            $table->string('sub_id')->nullable()->unique()->after('email');
-            $table->text('config_link')->nullable()->after('status');
-            $table->text('subscription_link')->nullable()->after('config_link');
-        });
+        if (! Schema::hasColumn('clients', 'sub_id')) {
+            Schema::table('clients', function (Blueprint $table) {
+                $table->string('sub_id')->nullable()->unique()->after('email');
+            });
+        }
+
+        if (! Schema::hasColumn('clients', 'config_link')) {
+            Schema::table('clients', function (Blueprint $table) {
+                $table->text('config_link')->nullable()->after('status');
+            });
+        }
+
+        if (! Schema::hasColumn('clients', 'subscription_link')) {
+            Schema::table('clients', function (Blueprint $table) {
+                $table->text('subscription_link')->nullable()->after('config_link');
+            });
+        }
     }
 
     public function down(): void
     {
-        Schema::table('clients', function (Blueprint $table) {
-            $table->dropColumn(['sub_id', 'config_link', 'subscription_link']);
-        });
-
-        Schema::table('settings', function (Blueprint $table) {
-            $table->dropColumn('subscription_base_url');
-        });
+        // These columns are now part of the table creation migrations.
     }
 };
