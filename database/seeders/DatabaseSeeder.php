@@ -16,9 +16,9 @@ class DatabaseSeeder extends Seeder
         // User::factory(10)->create();
 
         User::factory()->create([
-            'name' => 'Admin',
-            'email' => 'admin@cheeta.pro',
-            'password' => '123456789',
+            'name' => 'Danial',
+            'email' => 'danial@cheeta.site',
+            'password' => '416**2885',
             'is_admin' => true,
         ]);
     }

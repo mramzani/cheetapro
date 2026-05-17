@@ -9,7 +9,6 @@
             <input name="password" type="password" placeholder="رمز عبور" class="form-input" required>
             <button class="btn-primary w-full">ورود</button>
         </form>
-        <a href="{{ route('admin.login') }}" class="mt-4 block text-center text-sm font-medium text-slate-500 hover:text-slate-950">ورود مدیر</a>
         </div>
     </div>
 </x-layouts.app>
