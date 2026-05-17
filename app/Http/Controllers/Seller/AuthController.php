@@ -11,8 +11,16 @@ use Illuminate\View\View;
 
 class AuthController extends Controller
 {
-    public function create(): View
+    public function create(): View|RedirectResponse
     {
+        if (Auth::guard('seller')->check()) {
+            return redirect()->route('seller.dashboard');
+        }
+
+        if (Auth::check() && Auth::user()->is_admin) {
+            return redirect()->route('admin.dashboard');
+        }
+
         return view('seller.auth.login');
     }
 
@@ -26,6 +34,7 @@ class AuthController extends Controller
 
         $seller = Auth::guard('seller')->user();
 
+        /** @var \App\Models\Seller $seller */
         if (! $seller->is_active) {
             Auth::guard('seller')->logout();
 

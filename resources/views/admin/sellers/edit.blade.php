@@ -9,6 +9,11 @@
             <input name="name" value="{{ old('name', $seller->name) }}" class="form-input" required>
             <input name="username" value="{{ old('username', $seller->username) }}" class="form-input" required>
             <input name="password" type="password" placeholder="رمز جدید؛ در صورت عدم تغییر خالی بماند" class="form-input">
+            <div class="grid gap-4 sm:grid-cols-2">
+                <input name="price_per_gb" type="number" min="0" value="{{ old('price_per_gb', $seller->price_per_gb) }}" placeholder="قیمت اختصاصی هر گیگ (اختیاری)" class="form-input">
+                <input name="xui_inbound_id" type="number" min="1" value="{{ old('xui_inbound_id', $seller->xui_inbound_id) }}" placeholder="Inbound اختصاصی (اختیاری)" class="form-input">
+            </div>
+            <p class="text-xs leading-6 text-slate-500">اگر این فیلدها خالی باشند، تنظیمات کلی سیستم برای فروشنده استفاده می‌شود.</p>
             <input name="is_active" value="0" type="hidden">
             <label class="flex items-center gap-2 rounded-2xl bg-slate-50 p-3 text-sm font-medium">
                 <input name="is_active" value="1" type="checkbox" class="size-4 rounded border-slate-300" @checked(old('is_active', $seller->is_active))>

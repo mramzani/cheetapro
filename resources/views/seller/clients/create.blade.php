@@ -8,9 +8,9 @@
             <h2 class="mb-6 text-lg font-black">کیف پول</h2>
             <p class="stat-label">موجودی فعلی</p>
             <p class="stat-value">{{ number_format($seller->wallet?->balance ?? 0) }}</p>
-            <div class="mt-6 rounded-2xl bg-slate-50 p-4 text-sm text-slate-600">
-                هزینه نهایی بر اساس حجم انتخابی و نرخ هر گیگ از کیف پول کسر می‌شود.
-            </div>
+            {{-- <div class="mt-6 rounded-2xl bg-slate-50 p-4 text-sm text-slate-600">
+                هزینه نهایی با نرخ {{ number_format($pricePerGb) }} برای هر گیگ از کیف پول کسر می‌شود.
+            </div> --}}
         </div>
 
         <div class="panel-card lg:col-span-2">

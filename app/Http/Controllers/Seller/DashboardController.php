@@ -11,11 +11,15 @@ class DashboardController extends Controller
 {
     public function __invoke(): View
     {
-        $seller = Auth::guard('seller')->user()->load('wallet');
+        /** @var \App\Models\Seller $seller */
+        $seller = Auth::guard('seller')->user();
+        $seller->load('wallet');
+        $setting = Setting::current();
 
         return view('seller.dashboard', [
             'seller' => $seller,
-            'setting' => Setting::current(),
+            'setting' => $setting,
+            'pricePerGb' => $seller->effectivePricePerGb($setting),
             'recentClients' => $seller->clients()->latest()->limit(10)->get(),
         ]);
     }

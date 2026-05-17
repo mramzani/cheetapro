@@ -56,10 +56,12 @@ class ClientController extends Controller
     {
         /** @var \App\Models\Seller $seller */
         $seller = Auth::guard('seller')->user();
+        $setting = Setting::current();
 
         return view('seller.clients.create', [
             'seller' => $seller->load('wallet'),
-            'setting' => Setting::current(),
+            'setting' => $setting,
+            'pricePerGb' => $seller->effectivePricePerGb($setting),
         ]);
     }
 
@@ -68,22 +70,24 @@ class ClientController extends Controller
         /** @var \App\Models\Seller $seller */
         $seller = Auth::guard('seller')->user();
         $setting = Setting::current();
+        $inboundId = $seller->effectiveInboundId($setting);
+        $pricePerGb = $seller->effectivePricePerGb($setting);
         $data = $request->validated();
 
         try {
-            $client = DB::transaction(function () use ($seller, $setting, $data, $xuiClient): Client {
+            $client = DB::transaction(function () use ($seller, $setting, $data, $xuiClient, $inboundId, $pricePerGb): Client {
                 $wallet = Wallet::query()->where('seller_id', $seller->id)->lockForUpdate()->firstOrFail();
-                $cost = (int) $data['total_gb'] * $setting->price_per_gb;
+                $cost = (int) $data['total_gb'] * $pricePerGb;
 
                 if ($wallet->balance < $cost) {
                     throw new RuntimeException('موجودی کیف پول کافی نیست.');
                 }
 
-                if (! $setting->xui_inbound_id) {
+                if (! $inboundId) {
                     throw new RuntimeException('inbound_id در تنظیمات ثبت نشده است.');
                 }
 
-                $inbound = $xuiClient->findInbound($setting, $setting->xui_inbound_id);
+                $inbound = $xuiClient->findInbound($setting, $inboundId);
                 $payload = [
                     'uuid' => (string) Str::uuid(),
                     'email' => $this->makeUniqueEmail($seller->username, (int) $data['total_gb']),
@@ -94,7 +98,7 @@ class ClientController extends Controller
                     'comment' => $data['comment'] ?? '',
                 ];
 
-                $xuiResponse = $xuiClient->addClient($setting, $payload);
+                $xuiResponse = $xuiClient->addClient($setting, $payload, $inboundId);
                 $links = $xuiClient->makeClientLinks($setting, $inbound, $payload);
                 $before = $wallet->balance;
                 $after = $before - $cost;
@@ -104,7 +108,7 @@ class ClientController extends Controller
                     'uuid' => $payload['uuid'],
                     'email' => $payload['email'],
                     'sub_id' => $payload['sub_id'],
-                    'inbound_id' => $setting->xui_inbound_id,
+                    'inbound_id' => $inboundId,
                     'total_gb' => $data['total_gb'],
                     'total_bytes' => $payload['total_bytes'],
                     'expiry_time' => $payload['expiry_time'],
@@ -142,6 +146,23 @@ class ClientController extends Controller
         abort_unless($client->seller_id === Auth::guard('seller')->id(), 403);
 
         return view('seller.clients.show', ['client' => $client]);
+    }
+
+    public function toggle(Client $client, XuiClient $xuiClient): RedirectResponse
+    {
+        abort_unless($client->seller_id === Auth::guard('seller')->id(), 403);
+
+        $enabled = $client->status === 'disabled';
+
+        try {
+            $xuiClient->updateClientEnabled(Setting::current(), $client, $enabled);
+        } catch (RuntimeException $exception) {
+            return back()->withErrors(['client' => $exception->getMessage()]);
+        }
+
+        $client->update(['status' => $enabled ? 'active' : 'disabled']);
+
+        return back()->with('status', $enabled ? 'کلاینت فعال شد.' : 'کلاینت غیرفعال شد.');
     }
 
     private function makeUniqueEmail(string $username, int $totalGb): string

@@ -17,6 +17,8 @@ class Seller extends Authenticatable
         'username',
         'password',
         'is_active',
+        'price_per_gb',
+        'xui_inbound_id',
         'last_login_at',
     ];
 
@@ -30,8 +32,20 @@ class Seller extends Authenticatable
         return [
             'password' => 'hashed',
             'is_active' => 'boolean',
+            'price_per_gb' => 'integer',
+            'xui_inbound_id' => 'integer',
             'last_login_at' => 'datetime',
         ];
+    }
+
+    public function effectivePricePerGb(Setting $setting): int
+    {
+        return $this->price_per_gb ?? $setting->price_per_gb;
+    }
+
+    public function effectiveInboundId(Setting $setting): ?int
+    {
+        return $this->xui_inbound_id ?? $setting->xui_inbound_id;
     }
 
     public function wallet(): HasOne

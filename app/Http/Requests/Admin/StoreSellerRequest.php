@@ -19,6 +19,8 @@ class StoreSellerRequest extends FormRequest
             'username' => ['required', 'alpha_dash', 'max:255', Rule::unique('sellers', 'username')],
             'password' => ['required', 'string', 'min:6'],
             'is_active' => ['nullable', 'boolean'],
+            'price_per_gb' => ['nullable', 'integer', 'min:0'],
+            'xui_inbound_id' => ['nullable', 'integer', 'min:1'],
         ];
     }
 }

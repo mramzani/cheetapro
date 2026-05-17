@@ -53,12 +53,31 @@
         <a href="{{ route('seller.clients.create') }}" class="btn-primary mt-6">ساخت کلاینت بعدی</a>
     </div>
     <script>
+        const copyValue = async (input) => {
+            if (navigator.clipboard && window.isSecureContext) {
+                await navigator.clipboard.writeText(input.value);
+                return;
+            }
+
+            input.focus();
+            input.select();
+            input.setSelectionRange(0, input.value.length);
+            document.execCommand('copy');
+        };
+
         document.querySelectorAll('[data-copy-target]').forEach((button) => {
             button.addEventListener('click', async () => {
                 const input = document.getElementById(button.dataset.copyTarget);
-                await navigator.clipboard.writeText(input.value);
-                button.textContent = 'کپی شد';
-                setTimeout(() => button.textContent = 'کپی', 1500);
+                const originalText = button.textContent;
+
+                try {
+                    await copyValue(input);
+                    button.textContent = 'کپی شد';
+                } catch (error) {
+                    button.textContent = 'کپی نشد';
+                }
+
+                setTimeout(() => button.textContent = originalText, 1500);
             });
         });
     </script>

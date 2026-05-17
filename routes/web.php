@@ -9,14 +9,24 @@ use App\Http\Controllers\Admin\WalletController as AdminWalletController;
 use App\Http\Controllers\Seller\AuthController as SellerAuthController;
 use App\Http\Controllers\Seller\ClientController as SellerClientController;
 use App\Http\Controllers\Seller\DashboardController as SellerDashboardController;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
+    if (Auth::guard('seller')->check()) {
+        return redirect()->route('seller.dashboard');
+    }
+
+    if (Auth::check() && Auth::user()->is_admin) {
+        return redirect()->route('admin.dashboard');
+    }
+
     return redirect()->route('seller.login');
 });
 
-Route::get('login', function () {
-    return redirect()->route('seller.login');
+Route::get('login', function (): RedirectResponse {
+    return redirect('/');
 })->name('login');
 
 Route::middleware('guest')->prefix('admin')->name('admin.')->group(function () {
@@ -35,11 +45,12 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('settings/test-xui', [AdminSettingController::class, 'test'])->name('settings.test');
     Route::get('clients', [AdminClientController::class, 'index'])->name('clients.index');
     Route::post('clients/sync', [AdminClientController::class, 'sync'])->name('clients.sync');
+    Route::patch('clients/{client}/toggle', [AdminClientController::class, 'toggle'])->name('clients.toggle');
 });
 
-Route::middleware('guest:seller')->prefix('seller')->name('seller.')->group(function () {
+Route::prefix('seller')->name('seller.')->group(function () {
     Route::get('login', [SellerAuthController::class, 'create'])->name('login');
-    Route::post('login', [SellerAuthController::class, 'store'])->name('login.store');
+    Route::post('login', [SellerAuthController::class, 'store'])->middleware('guest:seller')->name('login.store');
 });
 
 Route::middleware(['auth:seller', 'seller.active'])->prefix('seller')->name('seller.')->group(function () {
@@ -49,5 +60,6 @@ Route::middleware(['auth:seller', 'seller.active'])->prefix('seller')->name('sel
     Route::post('clients/sync', [SellerClientController::class, 'sync'])->name('clients.sync');
     Route::get('clients/create', [SellerClientController::class, 'create'])->name('clients.create');
     Route::post('clients', [SellerClientController::class, 'store'])->name('clients.store');
+    Route::patch('clients/{client}/toggle', [SellerClientController::class, 'toggle'])->name('clients.toggle');
     Route::get('clients/{client}', [SellerClientController::class, 'show'])->name('clients.show');
 });

@@ -10,7 +10,7 @@
         </div>
         <div class="stat-card">
             <div class="stat-label">قیمت هر گیگ</div>
-            <div class="stat-value">{{ number_format($setting->price_per_gb) }}</div>
+            <div class="stat-value">نامشخص</div>
         </div>
         <div class="stat-card sm:col-span-2 lg:col-span-1">
             <div class="stat-label">کلاینت‌های شما</div>

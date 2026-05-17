@@ -47,6 +47,21 @@ class ClientController extends Controller
         return back()->with('status', $synced.' کلاینت بروزرسانی شد.');
     }
 
+    public function toggle(Client $client, XuiClient $xuiClient): RedirectResponse
+    {
+        $enabled = $client->status === 'disabled';
+
+        try {
+            $xuiClient->updateClientEnabled(Setting::current(), $client, $enabled);
+        } catch (RuntimeException $exception) {
+            return back()->withErrors(['client' => $exception->getMessage()]);
+        }
+
+        $client->update(['status' => $enabled ? 'active' : 'disabled']);
+
+        return back()->with('status', $enabled ? 'کلاینت فعال شد.' : 'کلاینت غیرفعال شد.');
+    }
+
     private function filteredClients(Request $request)
     {
         $search = trim($request->string('q')->toString());

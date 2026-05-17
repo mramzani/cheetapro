@@ -36,9 +36,10 @@ class XuiClient
         return $inbound;
     }
 
-    public function addClient(Setting $setting, array $client): array
+    public function addClient(Setting $setting, array $client, ?int $inboundId = null): array
     {
         $jar = $this->login($setting);
+        $inboundId ??= $setting->xui_inbound_id;
 
         $settings = json_encode([
             'clients' => [[
@@ -61,11 +62,35 @@ class XuiClient
             ->acceptJson()
             ->asJson()
             ->post($this->url($setting, '/dash/panel/api/inbounds/addClient'), [
-                'id' => (int) $setting->xui_inbound_id,
+                'id' => (int) $inboundId,
                 'settings' => $settings,
             ]);
 
         return $this->decode($response, 'ساخت کلاینت در x-ui ناموفق بود.');
+    }
+
+    public function updateClientEnabled(Setting $setting, Client $client, bool $enabled): array
+    {
+        $jar = $this->login($setting);
+        $settings = json_encode([
+            'clients' => [[
+                'id' => $client->uuid,
+                'email' => $client->email,
+                'totalGB' => $client->total_bytes,
+                'expiryTime' => $client->expiry_time,
+                'enable' => $enabled,
+            ]],
+        ], JSON_UNESCAPED_UNICODE);
+
+        $response = Http::withOptions(['cookies' => $jar])
+            ->acceptJson()
+            ->asForm()
+            ->post($this->url($setting, '/dash/panel/api/inbounds/updateClient/'.$client->uuid), [
+                'id' => $client->inbound_id,
+                'settings' => $settings,
+            ]);
+
+        return $this->decode($response, 'تغییر وضعیت کلاینت در x-ui ناموفق بود.');
     }
 
     public function getClientTraffic(Setting $setting, string $email): array
