@@ -14,7 +14,6 @@
             </form>
             <form method="POST" action="{{ route('seller.clients.sync') }}">
                 @csrf
-                <input type="hidden" name="q" value="{{ $search }}">
                 <button class="btn-primary w-full">بروزرسانی حجم و زمان</button>
             </form>
         </div>

@@ -26,7 +26,32 @@
 
         <div class="panel-card lg:col-span-2">
             <h2 class="mb-4 text-lg font-black">لیست فروشنده‌ها</h2>
-            <div class="table-wrap">
+            <div class="space-y-3 sm:hidden">
+                @forelse($sellers as $seller)
+                    <div class="rounded-2xl border border-slate-100 bg-slate-50/70 p-4">
+                        <div class="mb-3 flex items-start justify-between gap-3">
+                            <div class="min-w-0">
+                                <h3 class="truncate text-sm font-black text-slate-950">{{ $seller->name }}</h3>
+                                <p class="mt-1 truncate font-mono text-xs text-slate-500">{{ $seller->username }}</p>
+                            </div>
+                            <span class="badge shrink-0 {{ $seller->is_active ? 'badge-success' : '' }}">{{ $seller->is_active ? 'فعال' : 'غیرفعال' }}</span>
+                        </div>
+
+                        <div class="mb-4 flex items-center justify-between gap-3 text-sm">
+                            <span class="text-slate-500">موجودی</span>
+                            <span class="font-bold text-slate-900">{{ number_format($seller->wallet?->balance ?? 0) }}</span>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2">
+                            <a class="btn-secondary min-h-0 px-3 py-2" href="{{ route('admin.sellers.edit', $seller) }}">ویرایش</a>
+                            <a class="btn-success min-h-0 px-3 py-2" href="{{ route('admin.wallets.charge', $seller) }}">شارژ</a>
+                        </div>
+                    </div>
+                @empty
+                    <div class="rounded-2xl border border-slate-100 bg-slate-50 p-4 text-center text-sm text-slate-500">فروشنده‌ای ثبت نشده است.</div>
+                @endforelse
+            </div>
+            <div class="table-wrap hidden sm:block">
                 <table class="data-table">
                     <thead>
                         <tr>

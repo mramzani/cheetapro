@@ -31,25 +31,37 @@ class ClientController extends Controller
         ]);
     }
 
-    public function sync(Request $request, XuiClient $xuiClient): RedirectResponse
+    public function sync(XuiClient $xuiClient): RedirectResponse
     {
         /** @var \App\Models\Seller $seller */
         $seller = Auth::guard('seller')->user();
-        $search = trim($request->string('q')->toString());
-        $clients = $this->filteredClients($seller->id, $search)->get();
         $setting = Setting::current();
         $synced = 0;
+        $deleted = 0;
 
         try {
-            foreach ($clients as $client) {
-                $xuiClient->syncClient($client, $setting);
-                $synced++;
-            }
+            Client::query()
+                ->where('seller_id', $seller->id)
+                ->chunkById(100, function ($clients) use ($xuiClient, $setting, &$synced, &$deleted): void {
+                    foreach ($clients as $client) {
+                        try {
+                            $xuiClient->syncClient($client, $setting);
+                            $synced++;
+                        } catch (RuntimeException $exception) {
+                            if (! $xuiClient->isMissingClientTrafficException($exception)) {
+                                throw $exception;
+                            }
+
+                            $client->delete();
+                            $deleted++;
+                        }
+                    }
+                });
         } catch (RuntimeException $exception) {
             return back()->withErrors(['sync' => $exception->getMessage()]);
         }
 
-        return back()->with('status', $synced.' کلاینت بروزرسانی شد.');
+        return back()->with('status', $synced.' کلاینت بروزرسانی شد و '.$deleted.' کلاینت به علت پایان حجم حذف شد.');
     }
 
     public function create(): View

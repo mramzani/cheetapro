@@ -18,8 +18,6 @@
         </div>
         <form method="POST" action="{{ route('admin.clients.sync') }}" class="mb-4">
             @csrf
-            <input type="hidden" name="q" value="{{ $search }}">
-            <input type="hidden" name="seller_id" value="{{ $selectedSellerId }}">
             <button class="btn-primary w-full sm:w-auto">بروزرسانی حجم و زمان باقی‌مانده</button>
         </form>
         @include('admin.clients.partials.table', ['clients' => $clients])

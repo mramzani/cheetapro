@@ -136,6 +136,15 @@ class XuiClient
         return $client->refresh();
     }
 
+    public function isMissingClientTrafficException(RuntimeException $exception): bool
+    {
+        $message = strtolower($exception->getMessage());
+
+        return str_contains($message, 'inbound not found for email')
+            || str_contains($message, 'client not found')
+            || str_contains($message, 'email not found');
+    }
+
     public function makeClientLinks(Setting $setting, array $inbound, array $client): array
     {
         $streamSettings = $this->jsonField($inbound, 'streamSettings');
