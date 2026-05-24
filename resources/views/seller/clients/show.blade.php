@@ -9,14 +9,26 @@
                 <div class="mb-2 text-sm font-bold text-slate-700">لینک سرویس</div>
                 <div class="grid gap-2 sm:grid-cols-[1fr_auto]">
                     <textarea id="config-link" class="form-input min-h-28 font-mono text-xs leading-6 sm:text-sm" readonly>{{ $client->config_link }}</textarea>
-                    <button type="button" data-copy-target="config-link" class="btn-primary self-start">کپی</button>
+                    <div class="grid gap-2 self-start">
+                        <button type="button" data-copy-target="config-link" class="btn-primary">کپی</button>
+                        <form method="POST" action="{{ route('seller.clients.regenerate-link', $client) }}">
+                            @csrf
+                            <button class="btn-secondary w-full">دریافت لینک جدید</button>
+                        </form>
+                    </div>
                 </div>
             </div>
             <div>
                 <div class="mb-2 text-sm font-bold text-slate-700">لینک Subscription</div>
                 <div class="grid gap-2 sm:grid-cols-[1fr_auto]">
                     <input id="subscription-link" value="{{ $client->subscription_link }}" class="form-input font-mono text-xs sm:text-sm" readonly>
-                    <button type="button" data-copy-target="subscription-link" class="btn-primary">کپی</button>
+                    <div class="grid gap-2">
+                        <button type="button" data-copy-target="subscription-link" class="btn-primary">کپی</button>
+                        <form method="POST" action="{{ route('seller.clients.regenerate-subscription-link', $client) }}">
+                            @csrf
+                            <button class="btn-secondary w-full">تغییر لینک ساب</button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -50,7 +62,9 @@
                 <div><span class="badge badge-success">{{ $client->status }}</span></div>
             </div>
         </div>
-        <a href="{{ route('seller.clients.create') }}" class="btn-primary mt-6">ساخت کلاینت بعدی</a>
+        <div class="mt-6 flex flex-wrap gap-3">
+            <a href="{{ route('seller.clients.create') }}" class="btn-primary">ساخت کلاینت بعدی</a>
+        </div>
     </div>
     <script>
         const copyValue = async (input) => {

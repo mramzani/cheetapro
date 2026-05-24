@@ -21,6 +21,19 @@ class WalletController extends Controller
         return view('admin.wallets.charge', ['seller' => $seller]);
     }
 
+    public function transactions(Seller $seller): View
+    {
+        $seller->load('wallet');
+
+        return view('admin.wallets.transactions', [
+            'seller' => $seller,
+            'transactions' => $seller->walletTransactions()
+                ->with('createdBy')
+                ->latest()
+                ->paginate(20),
+        ]);
+    }
+
     public function store(ChargeWalletRequest $request, Seller $seller): RedirectResponse
     {
         $data = $request->validated();

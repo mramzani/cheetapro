@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\WalletController as AdminWalletController;
 use App\Http\Controllers\Seller\AuthController as SellerAuthController;
 use App\Http\Controllers\Seller\ClientController as SellerClientController;
 use App\Http\Controllers\Seller\DashboardController as SellerDashboardController;
+use App\Http\Controllers\Seller\WalletController as SellerWalletController;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -40,6 +41,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::resource('sellers', AdminSellerController::class)->only(['index', 'store', 'edit', 'update']);
     Route::get('sellers/{seller}/wallet/charge', [AdminWalletController::class, 'create'])->name('wallets.charge');
     Route::post('sellers/{seller}/wallet/charge', [AdminWalletController::class, 'store'])->name('wallets.charge.store');
+    Route::get('sellers/{seller}/wallet/transactions', [AdminWalletController::class, 'transactions'])->name('wallets.transactions');
     Route::get('settings', [AdminSettingController::class, 'edit'])->name('settings.edit');
     Route::put('settings', [AdminSettingController::class, 'update'])->name('settings.update');
     Route::post('settings/test-xui', [AdminSettingController::class, 'test'])->name('settings.test');
@@ -61,5 +63,8 @@ Route::middleware(['auth:seller', 'seller.active'])->prefix('seller')->name('sel
     Route::get('clients/create', [SellerClientController::class, 'create'])->name('clients.create');
     Route::post('clients', [SellerClientController::class, 'store'])->name('clients.store');
     Route::patch('clients/{client}/toggle', [SellerClientController::class, 'toggle'])->name('clients.toggle');
+    Route::post('clients/{client}/regenerate-link', [SellerClientController::class, 'regenerateLink'])->name('clients.regenerate-link');
+    Route::post('clients/{client}/regenerate-subscription-link', [SellerClientController::class, 'regenerateSubscriptionLink'])->name('clients.regenerate-subscription-link');
     Route::get('clients/{client}', [SellerClientController::class, 'show'])->name('clients.show');
+    Route::get('wallet/transactions', [SellerWalletController::class, 'transactions'])->name('wallets.transactions');
 });

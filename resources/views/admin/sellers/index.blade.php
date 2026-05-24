@@ -45,6 +45,7 @@
                         <div class="grid grid-cols-2 gap-2">
                             <a class="btn-secondary min-h-0 px-3 py-2" href="{{ route('admin.sellers.edit', $seller) }}">ویرایش</a>
                             <a class="btn-success min-h-0 px-3 py-2" href="{{ route('admin.wallets.charge', $seller) }}">شارژ</a>
+                            <a class="btn-secondary col-span-2 min-h-0 px-3 py-2" href="{{ route('admin.wallets.transactions', $seller) }}">تراکنش‌ها</a>
                         </div>
                     </div>
                 @empty
@@ -69,9 +70,10 @@
                                 <td class="font-mono">{{ $seller->username }}</td>
                                 <td>{{ number_format($seller->wallet?->balance ?? 0) }}</td>
                                 <td><span class="badge {{ $seller->is_active ? 'badge-success' : '' }}">{{ $seller->is_active ? 'فعال' : 'غیرفعال' }}</span></td>
-                                <td class="flex gap-2">
+                                <td class="flex flex-wrap gap-2">
                                     <a class="btn-secondary min-h-0 px-3 py-1.5" href="{{ route('admin.sellers.edit', $seller) }}">ویرایش</a>
                                     <a class="btn-success min-h-0 px-3 py-1.5" href="{{ route('admin.wallets.charge', $seller) }}">شارژ</a>
+                                    <a class="btn-secondary min-h-0 px-3 py-1.5" href="{{ route('admin.wallets.transactions', $seller) }}">تراکنش‌ها</a>
                                 </td>
                             </tr>
                         @empty

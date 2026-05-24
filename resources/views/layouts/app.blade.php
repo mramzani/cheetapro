@@ -24,6 +24,7 @@
                         <a class="nav-link" href="{{ route('seller.dashboard') }}">داشبورد</a>
                         <a class="nav-link" href="{{ route('seller.clients.create') }}">ساخت کلاینت</a>
                         <a class="nav-link" href="{{ route('seller.clients.index') }}">کلاینت‌ها</a>
+                        <a class="nav-link" href="{{ route('seller.wallets.transactions') }}">تراکنش‌ها</a>
                         <form method="POST" action="{{ route('seller.logout') }}">
                             @csrf
                             <button class="nav-link text-rose-600">خروج</button>

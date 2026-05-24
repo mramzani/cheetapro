@@ -71,14 +71,42 @@ class XuiClient
 
     public function updateClientEnabled(Setting $setting, Client $client, bool $enabled): array
     {
+        return $this->updateClient($setting, $client, [
+            'enable' => $enabled,
+        ], 'تغییر وضعیت کلاینت در x-ui ناموفق بود.');
+    }
+
+    public function updateClientUuid(Setting $setting, Client $client, string $uuid): array
+    {
+        return $this->updateClient($setting, $client, [
+            'id' => $uuid,
+        ], 'دریافت لینک جدید از x-ui ناموفق بود.');
+    }
+
+    public function updateClientSubId(Setting $setting, Client $client, string $subId): array
+    {
+        return $this->updateClient($setting, $client, [
+            'subId' => $subId,
+        ], 'تغییر لینک ساب در x-ui ناموفق بود.');
+    }
+
+    private function updateClient(Setting $setting, Client $client, array $overrides, string $message): array
+    {
         $jar = $this->login($setting);
         $settings = json_encode([
             'clients' => [[
-                'id' => $client->uuid,
+                'id' => $overrides['id'] ?? $client->uuid,
+                'alterId' => 0,
+                'flow' => '',
                 'email' => $client->email,
+                'limitIp' => 0,
                 'totalGB' => $client->total_bytes,
                 'expiryTime' => $client->expiry_time,
-                'enable' => $enabled,
+                'enable' => $overrides['enable'] ?? ($client->status !== 'disabled'),
+                'tgId' => $client->tg_id ?? '',
+                'subId' => $overrides['subId'] ?? $client->sub_id,
+                'comment' => $client->comment ?? '',
+                'reset' => 0,
             ]],
         ], JSON_UNESCAPED_UNICODE);
 
@@ -90,7 +118,7 @@ class XuiClient
                 'settings' => $settings,
             ]);
 
-        return $this->decode($response, 'تغییر وضعیت کلاینت در x-ui ناموفق بود.');
+        return $this->decode($response, $message);
     }
 
     public function getClientTraffic(Setting $setting, string $email): array

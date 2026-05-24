@@ -160,6 +160,63 @@ class ClientController extends Controller
         return view('seller.clients.show', ['client' => $client]);
     }
 
+    public function regenerateLink(Client $client, XuiClient $xuiClient): RedirectResponse
+    {
+        abort_unless($client->seller_id === Auth::guard('seller')->id(), 403);
+
+        $setting = Setting::current();
+        $uuid = $this->makeUniqueUuid();
+
+        try {
+            $inbound = $xuiClient->findInbound($setting, $client->inbound_id);
+            $xuiResponse = $xuiClient->updateClientUuid($setting, $client, $uuid);
+            $links = $xuiClient->makeClientLinks($setting, $inbound, [
+                'uuid' => $uuid,
+                'email' => $client->email,
+                'sub_id' => $client->sub_id,
+            ]);
+        } catch (RuntimeException $exception) {
+            return back()->withErrors(['client' => $exception->getMessage()]);
+        }
+
+        $client->update([
+            'uuid' => $uuid,
+            'config_link' => $links['config_link'],
+            'subscription_link' => $links['subscription_link'],
+            'xui_response' => array_merge($client->xui_response ?? [], ['regenerate_link' => $xuiResponse]),
+        ]);
+
+        return back()->with('status', 'لینک جدید با موفقیت ساخته شد.');
+    }
+
+    public function regenerateSubscriptionLink(Client $client, XuiClient $xuiClient): RedirectResponse
+    {
+        abort_unless($client->seller_id === Auth::guard('seller')->id(), 403);
+
+        $setting = Setting::current();
+        $subId = $this->makeUniqueSubId();
+
+        try {
+            $inbound = $xuiClient->findInbound($setting, $client->inbound_id);
+            $xuiResponse = $xuiClient->updateClientSubId($setting, $client, $subId);
+            $links = $xuiClient->makeClientLinks($setting, $inbound, [
+                'uuid' => $client->uuid,
+                'email' => $client->email,
+                'sub_id' => $subId,
+            ]);
+        } catch (RuntimeException $exception) {
+            return back()->withErrors(['client' => $exception->getMessage()]);
+        }
+
+        $client->update([
+            'sub_id' => $subId,
+            'subscription_link' => $links['subscription_link'],
+            'xui_response' => array_merge($client->xui_response ?? [], ['regenerate_subscription_link' => $xuiResponse]),
+        ]);
+
+        return back()->with('status', 'لینک ساب جدید با موفقیت ساخته شد.');
+    }
+
     public function toggle(Client $client, XuiClient $xuiClient): RedirectResponse
     {
         abort_unless($client->seller_id === Auth::guard('seller')->id(), 403);
@@ -197,6 +254,15 @@ class ClientController extends Controller
         } while (Client::where('sub_id', $subId)->exists());
 
         return $subId;
+    }
+
+    private function makeUniqueUuid(): string
+    {
+        do {
+            $uuid = (string) Str::uuid();
+        } while (Client::where('uuid', $uuid)->exists());
+
+        return $uuid;
     }
 
     private function filteredClients(int $sellerId, string $search)
